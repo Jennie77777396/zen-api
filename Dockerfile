@@ -59,6 +59,7 @@ RUN ls -la dist/ && test -f dist/src/main.js
 # Expose port
 EXPOSE 3000
 
-# Start the application (runs migrations first, then starts the app)
-# Ensure all output (stdout and stderr) is visible
-CMD ["sh", "-c", "echo '=== Starting migrations ===' && (npx prisma migrate deploy 2>&1 && echo '=== Migrations completed successfully ===') || (echo '=== Migration failed or no migrations needed ===' && echo '=== Continuing to start application ===') && echo '=== Starting NestJS application ===' && exec node dist/src/main.js"]
+# Start the application
+# Note: Migrations should be run manually or via Railway's post-deploy hook if needed
+# For now, we'll start the app directly - migrations can be run separately if needed
+CMD ["sh", "-c", "echo '=== Starting NestJS application ===' && exec node dist/src/main.js"]
