@@ -11,24 +11,37 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
       throw new Error('DATABASE_URL environment variable is not set');
     }
     
-    // Parse connection string to ensure proper format
-    let finalConnectionString = connectionString;
+    const isSupabase = connectionString.includes('supabase.co');
     
-    // If using Supabase, ensure SSL is enabled and use direct connection if needed
-    if (connectionString.includes('supabase.co')) {
-      // Add SSL mode if not present
-      if (!connectionString.includes('sslmode=')) {
-        finalConnectionString = connectionString.includes('?')
-          ? `${connectionString}&sslmode=require`
-          : `${connectionString}?sslmode=require`;
-      }
+    // Parse connection string - remove sslmode from connection string, we'll handle it in Pool config
+    let finalConnectionString = connectionString;
+    if (isSupabase) {
+      // Remove any existing sslmode parameter to avoid conflicts
+      finalConnectionString = finalConnectionString.replace(/[?&]sslmode=[^&]*/g, '');
+      // Clean up any trailing ? or & after removal
+      finalConnectionString = finalConnectionString.replace(/[?&]$/, '');
     }
     
     console.log('Connecting to database...');
-    const pool = new Pool({ 
+    console.log(`Using Supabase: ${isSupabase}`);
+    
+    // Configure Pool with explicit SSL settings for Supabase
+    const poolConfig: any = {
       connectionString: finalConnectionString,
-      ssl: connectionString.includes('supabase.co') ? { rejectUnauthorized: false } : undefined,
-    });
+    };
+    
+    if (isSupabase) {
+      // For Supabase, configure SSL to accept self-signed certificates
+      // This is necessary for local development with Supabase
+      poolConfig.ssl = {
+        rejectUnauthorized: false, // Accept self-signed certificates
+        require: true, // Require SSL connection
+      };
+    }
+    
+    console.log('Pool config SSL:', isSupabase ? 'enabled (rejectUnauthorized: false)' : 'disabled');
+    
+    const pool = new Pool(poolConfig);
     const adapter = new PrismaPg(pool);
     super({ adapter });
   }

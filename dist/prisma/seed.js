@@ -7,7 +7,16 @@ const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
     throw new Error('DATABASE_URL environment variable is not set');
 }
-const pool = new pg_1.Pool({ connectionString });
+const isSupabase = connectionString.includes('supabase.co');
+const poolConfig = {
+    connectionString: connectionString,
+};
+if (isSupabase) {
+    poolConfig.ssl = {
+        rejectUnauthorized: false,
+    };
+}
+const pool = new pg_1.Pool(poolConfig);
 const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
@@ -18,7 +27,9 @@ async function main() {
         data: {
             content: 'Nothing is so repulsive as a sentimentalist in a dry season.',
             bookName: 'The Picture of Dorian Gray',
-            categoryId: philosophy.id
+            categories: {
+                connect: { id: philosophy.id }
+            }
         }
     });
     console.log('Seed 数据注入成功！');

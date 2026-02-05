@@ -3,29 +3,27 @@ export declare class SentenceService {
     private prisma;
     constructor(prisma: PrismaService);
     findAll(): Promise<({
-        category: {
+        categories: {
             id: string;
             name: string;
-        };
+        }[];
     } & {
         id: string;
         createdAt: Date;
         content: string;
         bookName: string | null;
-        categoryId: string;
         updatedAt: Date;
     })[]>;
-    create(content: string, categoryId: string, bookName?: string): Promise<{
-        category: {
+    create(content: string, categoryIds: string[], bookName?: string): Promise<{
+        categories: {
             id: string;
             name: string;
-        };
+        }[];
     } & {
         id: string;
         createdAt: Date;
         content: string;
         bookName: string | null;
-        categoryId: string;
         updatedAt: Date;
     }>;
     remove(id: string): Promise<{

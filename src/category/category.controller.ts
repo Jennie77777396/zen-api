@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { CategoryService } from './category.service';
 
 @Controller('categories')
@@ -32,6 +32,22 @@ export class CategoryController {
       }
       throw new HttpException(
         `Failed to create category: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    try {
+      return await this.categoryService.remove(id);
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        `Failed to delete category: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

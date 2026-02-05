@@ -18,8 +18,14 @@ let CategoryService = class CategoryService {
         this.prisma = prisma;
     }
     async getTree() {
-        const categories = await this.prisma.category.findMany();
-        return this.listToTree(categories, null);
+        try {
+            const categories = await this.prisma.category.findMany();
+            return this.listToTree(categories, null);
+        }
+        catch (error) {
+            console.error('Error in getTree:', error);
+            throw new common_1.InternalServerErrorException(`Failed to get category tree: ${error.message}`);
+        }
     }
     listToTree(list, parentId) {
         return list
@@ -30,17 +36,54 @@ let CategoryService = class CategoryService {
         }));
     }
     async create(name, parentId) {
-        if (parentId) {
-            const parent = await this.prisma.category.findUnique({
-                where: { id: parentId },
-            });
-            if (!parent) {
-                throw new Error(`Parent category with ID ${parentId} not found`);
+        try {
+            if (parentId) {
+                const parent = await this.prisma.category.findUnique({
+                    where: { id: parentId },
+                });
+                if (!parent) {
+                    throw new common_1.NotFoundException(`Parent category with ID ${parentId} not found`);
+                }
             }
+            return await this.prisma.category.create({
+                data: { name, parentId },
+            });
         }
-        return this.prisma.category.create({
-            data: { name, parentId },
-        });
+        catch (error) {
+            console.error('Error in create:', error);
+            if (error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            throw new common_1.InternalServerErrorException(`Failed to create category: ${error.message}`);
+        }
+    }
+    async remove(id) {
+        try {
+            const category = await this.prisma.category.findUnique({
+                where: { id },
+                include: {
+                    children: true,
+                    sentences: true,
+                },
+            });
+            if (!category) {
+                throw new common_1.NotFoundException(`Category with ID ${id} not found`);
+            }
+            if (category.children && category.children.length > 0) {
+                throw new common_1.InternalServerErrorException(`Cannot delete category with ID ${id}: it has ${category.children.length} child categories. Please delete or move children first.`);
+            }
+            await this.prisma.category.delete({
+                where: { id },
+            });
+            return { message: 'Category deleted successfully' };
+        }
+        catch (error) {
+            console.error('Error in remove:', error);
+            if (error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            throw new common_1.InternalServerErrorException(`Failed to delete category: ${error.message}`);
+        }
     }
 };
 exports.CategoryService = CategoryService;

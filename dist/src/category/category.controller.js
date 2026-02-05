@@ -44,6 +44,18 @@ let CategoryController = class CategoryController {
             throw new common_1.HttpException(`Failed to create category: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    async remove(id) {
+        try {
+            return await this.categoryService.remove(id);
+        }
+        catch (error) {
+            console.error('Error deleting category:', error);
+            if (error instanceof common_1.HttpException) {
+                throw error;
+            }
+            throw new common_1.HttpException(`Failed to delete category: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 };
 exports.CategoryController = CategoryController;
 __decorate([
@@ -59,6 +71,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CategoryController.prototype, "create", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CategoryController.prototype, "remove", null);
 exports.CategoryController = CategoryController = __decorate([
     (0, common_1.Controller)('categories'),
     __metadata("design:paramtypes", [category_service_1.CategoryService])

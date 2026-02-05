@@ -18,54 +18,87 @@ let SentenceService = class SentenceService {
         this.prisma = prisma;
     }
     async findAll() {
-        return this.prisma.sentence.findMany({
-            include: {
-                category: {
-                    select: {
-                        id: true,
-                        name: true,
+        try {
+            return await this.prisma.sentence.findMany({
+                include: {
+                    categories: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
                     },
                 },
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
-    }
-    async create(content, categoryId, bookName) {
-        const category = await this.prisma.category.findUnique({
-            where: { id: categoryId },
-        });
-        if (!category) {
-            throw new common_1.NotFoundException(`Category with ID ${categoryId} not found`);
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            });
         }
-        return this.prisma.sentence.create({
-            data: {
-                content,
-                categoryId,
-                bookName,
-            },
-            include: {
-                category: {
-                    select: {
-                        id: true,
-                        name: true,
+        catch (error) {
+            console.error('Error in findAll:', error);
+            throw new common_1.InternalServerErrorException(`Failed to fetch sentences: ${error.message}`);
+        }
+    }
+    async create(content, categoryIds, bookName) {
+        try {
+            if (categoryIds.length === 0) {
+                throw new common_1.NotFoundException('At least one category is required');
+            }
+            const categories = await this.prisma.category.findMany({
+                where: {
+                    id: { in: categoryIds },
+                },
+            });
+            if (categories.length !== categoryIds.length) {
+                const foundIds = categories.map(c => c.id);
+                const missingIds = categoryIds.filter(id => !foundIds.includes(id));
+                throw new common_1.NotFoundException(`Categories with IDs ${missingIds.join(', ')} not found`);
+            }
+            return await this.prisma.sentence.create({
+                data: {
+                    content,
+                    bookName,
+                    categories: {
+                        connect: categoryIds.map(id => ({ id })),
                     },
                 },
-            },
-        });
+                include: {
+                    categories: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                },
+            });
+        }
+        catch (error) {
+            console.error('Error in create:', error);
+            if (error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            throw new common_1.InternalServerErrorException(`Failed to create sentence: ${error.message}`);
+        }
     }
     async remove(id) {
-        const sentence = await this.prisma.sentence.findUnique({
-            where: { id },
-        });
-        if (!sentence) {
-            throw new common_1.NotFoundException(`Sentence with ID ${id} not found`);
+        try {
+            const sentence = await this.prisma.sentence.findUnique({
+                where: { id },
+            });
+            if (!sentence) {
+                throw new common_1.NotFoundException(`Sentence with ID ${id} not found`);
+            }
+            await this.prisma.sentence.delete({
+                where: { id },
+            });
+            return { message: 'Sentence deleted successfully' };
         }
-        await this.prisma.sentence.delete({
-            where: { id },
-        });
-        return { message: 'Sentence deleted successfully' };
+        catch (error) {
+            console.error('Error in remove:', error);
+            if (error instanceof common_1.NotFoundException) {
+                throw error;
+            }
+            throw new common_1.InternalServerErrorException(`Failed to delete sentence: ${error.message}`);
+        }
     }
 };
 exports.SentenceService = SentenceService;

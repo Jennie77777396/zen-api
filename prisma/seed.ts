@@ -7,7 +7,21 @@ if (!connectionString) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
-const pool = new Pool({ connectionString });
+const isSupabase = connectionString.includes('supabase.co');
+
+// Configure Pool with SSL settings for Supabase
+const poolConfig: any = {
+  connectionString: connectionString,
+};
+
+if (isSupabase) {
+  // For Supabase, we need to accept self-signed certificates
+  poolConfig.ssl = {
+    rejectUnauthorized: false, // Accept self-signed certificates
+  };
+}
+
+const pool = new Pool(poolConfig);
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 

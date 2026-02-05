@@ -24,7 +24,8 @@ let SentenceController = class SentenceController {
         return this.sentenceService.findAll();
     }
     create(body) {
-        return this.sentenceService.create(body.content, body.categoryId, body.bookName);
+        const categoryIds = body.categoryIds || (body.categoryId ? [body.categoryId] : []);
+        return this.sentenceService.create(body.content, categoryIds, body.bookName);
     }
     remove(id) {
         return this.sentenceService.remove(id);

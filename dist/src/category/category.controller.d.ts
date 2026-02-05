@@ -9,7 +9,10 @@ export declare class CategoryController {
     }): Promise<{
         id: string;
         name: string;
-        parentId: string | null;
         createdAt: Date;
+        parentId: string | null;
+    }>;
+    remove(id: string): Promise<{
+        message: string;
     }>;
 }

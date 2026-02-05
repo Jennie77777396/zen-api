@@ -23,7 +23,15 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Zen API - A NestJS backend for managing sentences and categories with search functionality.
+
+## Features
+
+- ✅ Category CRUD (with tree structure support)
+- ✅ Sentence CRUD (with multi-category support)
+- ✅ Search functionality (categories and sentences)
+- ✅ PostgreSQL database with Prisma ORM
+- ✅ Supabase integration support
 
 ## Project setup
 
@@ -55,20 +63,55 @@ $ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
+
+# API integration tests
+$ ./test.sh          # Test all endpoints
+$ ./test.sh crud     # Test CRUD only
+$ ./test.sh search    # Test search only
+```
+
+## API Endpoints
+
+### Categories
+- `GET /categories/tree` - Get category tree
+- `POST /categories` - Create category
+- `DELETE /categories/:id` - Delete category
+
+### Sentences
+- `GET /sentences` - Get all sentences
+- `POST /sentences` - Create sentence
+- `DELETE /sentences/:id` - Delete sentence
+
+### Search
+- `GET /search/categories?q=query` - Search categories
+- `GET /search/sentences?q=query` - Search sentences
+- `GET /search?q=query` - Comprehensive search
+
+## Environment Variables
+
+```bash
+DATABASE_URL=postgresql://user:password@host:port/database
+NODE_ENV=development
+PORT=3000
+FRONTEND_URL=http://localhost:5173
+```
+
+## Database Setup
+
+```bash
+# Generate Prisma Client
+$ npx prisma generate
+
+# Run migrations
+$ npx prisma migrate dev
+
+# Seed database
+$ npx prisma db seed
 ```
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+See deployment documentation in the root directory for Railway and Vercel deployment instructions.
 
 ## Resources
 
