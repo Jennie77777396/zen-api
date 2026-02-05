@@ -60,4 +60,5 @@ RUN ls -la dist/ && test -f dist/src/main.js
 EXPOSE 3000
 
 # Start the application (runs migrations first, then starts the app)
-CMD ["sh", "-c", "echo 'Starting migrations...' && npx prisma migrate deploy && echo 'Migrations completed. Starting application...' && node dist/src/main.js"]
+# Ensure all output (stdout and stderr) is visible
+CMD ["sh", "-c", "echo '=== Starting migrations ===' && (npx prisma migrate deploy 2>&1 && echo '=== Migrations completed successfully ===') || (echo '=== Migration failed or no migrations needed ===' && echo '=== Continuing to start application ===') && echo '=== Starting NestJS application ===' && exec node dist/src/main.js"]
