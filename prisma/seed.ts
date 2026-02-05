@@ -19,12 +19,14 @@ async function main() {
   // 创建分类
   const philosophy = await prisma.category.create({ data: { name: 'Philosophy' } });
   
-  // 创建句子
+  // 创建句子（多分类支持）
   await prisma.sentence.create({
     data: {
       content: 'Nothing is so repulsive as a sentimentalist in a dry season.',
       bookName: 'The Picture of Dorian Gray',
-      categoryId: philosophy.id
+      categories: {
+        connect: { id: philosophy.id }
+      }
     }
   });
 
