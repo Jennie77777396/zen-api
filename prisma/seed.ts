@@ -16,7 +16,19 @@ async function main() {
   await prisma.sentence.deleteMany();
   await prisma.category.deleteMany();
 
-  console.log('Seed 数据已清空！');
+  // 创建分类
+  const philosophy = await prisma.category.create({ data: { name: 'Philosophy' } });
+  
+  // 创建句子
+  await prisma.sentence.create({
+    data: {
+      content: 'Nothing is so repulsive as a sentimentalist in a dry season.',
+      bookName: 'The Picture of Dorian Gray',
+      categoryId: philosophy.id
+    }
+  });
+
+  console.log('Seed 数据注入成功！');
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect());

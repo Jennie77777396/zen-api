@@ -30,39 +30,9 @@ let CategoryService = class CategoryService {
         }));
     }
     async create(name, parentId) {
-        if (parentId) {
-            const parent = await this.prisma.category.findUnique({
-                where: { id: parentId },
-            });
-            if (!parent) {
-                throw new common_1.NotFoundException(`Parent category with ID ${parentId} not found`);
-            }
-        }
         return this.prisma.category.create({
             data: { name, parentId },
         });
-    }
-    async remove(id) {
-        const category = await this.prisma.category.findUnique({
-            where: { id },
-            include: {
-                children: true,
-                sentences: true,
-            },
-        });
-        if (!category) {
-            throw new common_1.NotFoundException(`Category with ID ${id} not found`);
-        }
-        if (category.children.length > 0) {
-            throw new Error('Cannot delete category with child categories. Please delete child categories first.');
-        }
-        if (category.sentences.length > 0) {
-            throw new Error('Cannot delete category with associated sentences. Please delete or move sentences first.');
-        }
-        await this.prisma.category.delete({
-            where: { id },
-        });
-        return { message: 'Category deleted successfully' };
     }
 };
 exports.CategoryService = CategoryService;

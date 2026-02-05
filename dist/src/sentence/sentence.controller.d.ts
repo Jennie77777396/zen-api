@@ -9,10 +9,10 @@ export declare class SentenceController {
         };
     } & {
         id: string;
-        createdAt: Date;
         content: string;
         bookName: string | null;
         categoryId: string;
+        createdAt: Date;
         updatedAt: Date;
     })[]>;
     create(body: {
@@ -26,10 +26,10 @@ export declare class SentenceController {
         };
     } & {
         id: string;
-        createdAt: Date;
         content: string;
         bookName: string | null;
         categoryId: string;
+        createdAt: Date;
         updatedAt: Date;
     }>;
     remove(id: string): Promise<{
