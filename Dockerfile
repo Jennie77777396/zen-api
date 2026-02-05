@@ -48,8 +48,8 @@ COPY --from=builder /app/dist ./dist
 # Copy Prisma schema and migrations (needed for migrations)
 COPY --from=builder /app/prisma ./prisma
 
-# Copy Prisma CLI binary if it exists
-COPY --from=builder /app/node_modules/.bin/prisma* ./node_modules/.bin/ 2>/dev/null || true
+# Note: Prisma CLI is already installed via "npm install prisma --save-dev --no-save" above
+# No need to copy from builder stage
 
 # Verify files exist (NestJS keeps src/ structure)
 RUN ls -la dist/ && test -f dist/src/main.js
