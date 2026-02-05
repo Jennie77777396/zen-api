@@ -11,8 +11,9 @@ COPY package.json package-lock.json* ./
 # Install ALL dependencies (including dev dependencies for building)
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
-# Copy Prisma schema (needed for generate)
+# Copy Prisma schema and config (needed for generate)
 COPY prisma ./prisma
+COPY prisma.config.ts ./
 
 # Generate Prisma Client
 RUN npx prisma generate
@@ -45,8 +46,9 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Copy Prisma schema and migrations (needed for migrations)
+# Copy Prisma schema, migrations, and config (needed for migrations)
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./
 
 # Note: Prisma CLI is already installed via "npm install prisma --save-dev --no-save" above
 # No need to copy from builder stage
