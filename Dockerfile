@@ -57,8 +57,5 @@ RUN ls -la dist/ && test -f dist/src/main.js
 # Expose port
 EXPOSE 3000
 
-# Create startup script that runs migrations before starting the app
-RUN echo '#!/bin/sh\nnpx prisma migrate deploy\nnode dist/src/main.js' > /app/start.sh && chmod +x /app/start.sh
-
 # Start the application (runs migrations first, then starts the app)
-CMD ["/app/start.sh"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
