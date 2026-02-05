@@ -22,17 +22,28 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
       finalConnectionString = finalConnectionString.replace(/[?&]$/, '');
     }
     
+    console.log('========================================');
+    console.log('🔍 DATABASE CONNECTION DEBUG INFO');
+    console.log('========================================');
     console.log('Connecting to database...');
     console.log(`Using Supabase: ${isSupabase}`);
     
     // Check if using connection pooling (port 6543) or direct connection (port 5432)
     const isPooling = finalConnectionString.includes(':6543') || finalConnectionString.includes('pooler.supabase.com');
+    const portMatch = finalConnectionString.match(/:(\d+)\//);
+    const port = portMatch ? portMatch[1] : 'unknown';
+    const hostMatch = finalConnectionString.match(/@([^:]+):/);
+    const host = hostMatch ? hostMatch[1] : 'unknown';
+    
     if (isSupabase) {
-      console.log(`Connection type: ${isPooling ? 'Connection Pooling (recommended for Railway)' : 'Direct connection'}`);
+      console.log(`Connection type: ${isPooling ? '✅ Connection Pooling (recommended for Railway)' : '❌ Direct connection (may fail on Railway)'}`);
+      console.log(`Port: ${port} ${port === '6543' ? '✅' : port === '5432' ? '❌ (should be 6543)' : '⚠️'}`);
+      console.log(`Host: ${host} ${host.includes('pooler') ? '✅' : '❌ (should contain pooler)'}`);
       // Log connection details (without password) for debugging
       const connectionInfo = finalConnectionString.replace(/:[^:@]+@/, ':****@');
-      console.log(`Connection string: ${connectionInfo.substring(0, 100)}...`);
+      console.log(`Full connection string: ${connectionInfo}`);
     }
+    console.log('========================================');
     
     // Configure Pool with explicit SSL settings for Supabase
     const poolConfig: any = {
