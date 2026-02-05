@@ -5,8 +5,8 @@ export declare class SearchController {
     searchCategories(query: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         parentId: string | null;
+        createdAt: Date;
     }[]>;
     searchSentences(query: string): Promise<({
         categories: {
@@ -24,8 +24,8 @@ export declare class SearchController {
         categories: {
             id: string;
             name: string;
-            createdAt: Date;
             parentId: string | null;
+            createdAt: Date;
         }[];
         sentences: ({
             categories: {

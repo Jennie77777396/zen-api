@@ -25,6 +25,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     console.log('Connecting to database...');
     console.log(`Using Supabase: ${isSupabase}`);
     
+    // Check if using connection pooling (port 6543) or direct connection (port 5432)
+    const isPooling = finalConnectionString.includes(':6543') || finalConnectionString.includes('pooler.supabase.com');
+    if (isSupabase) {
+      console.log(`Connection type: ${isPooling ? 'Connection Pooling (recommended for Railway)' : 'Direct connection'}`);
+      // Log connection details (without password) for debugging
+      const connectionInfo = finalConnectionString.replace(/:[^:@]+@/, ':****@');
+      console.log(`Connection string: ${connectionInfo.substring(0, 100)}...`);
+    }
+    
     // Configure Pool with explicit SSL settings for Supabase
     const poolConfig: any = {
       connectionString: finalConnectionString,

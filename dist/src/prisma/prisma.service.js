@@ -28,6 +28,10 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
         }
         console.log('Connecting to database...');
         console.log(`Using Supabase: ${isSupabase}`);
+        const isPooling = finalConnectionString.includes(':6543') || finalConnectionString.includes('pooler.supabase.com');
+        if (isSupabase) {
+            console.log(`Connection type: ${isPooling ? 'Connection Pooling (recommended for Railway)' : 'Direct connection'}`);
+        }
         const poolConfig = {
             connectionString: finalConnectionString,
         };
