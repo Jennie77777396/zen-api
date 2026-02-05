@@ -23,8 +23,8 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Verify build succeeded
-RUN ls -la dist/ && test -f dist/main.js
+# Verify build succeeded (NestJS keeps src/ structure, so main.js is in dist/src/)
+RUN ls -la dist/ && ls -la dist/src/ && test -f dist/src/main.js
 
 # Production stage
 FROM node:20-alpine
@@ -47,11 +47,11 @@ COPY --from=builder /app/dist ./dist
 # Copy Prisma schema (needed for migrations if any)
 COPY --from=builder /app/prisma ./prisma
 
-# Verify files exist
-RUN ls -la dist/ && test -f dist/main.js
+# Verify files exist (NestJS keeps src/ structure)
+RUN ls -la dist/ && test -f dist/src/main.js
 
 # Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "dist/main.js"]
+# Start the application (NestJS outputs to dist/src/main.js)
+CMD ["npm", "run", "start:prod"]
