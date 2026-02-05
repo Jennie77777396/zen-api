@@ -60,4 +60,4 @@ RUN ls -la dist/ && test -f dist/src/main.js
 EXPOSE 3000
 
 # Start the application (runs migrations first, then starts the app)
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
+CMD ["sh", "-c", "echo 'Starting migrations...' && npx prisma migrate deploy && echo 'Migrations completed. Starting application...' && node dist/src/main.js"]

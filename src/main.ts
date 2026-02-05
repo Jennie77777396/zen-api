@@ -3,6 +3,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  console.log('Starting NestJS application...');
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`PORT: ${process.env.PORT ?? 3000}`);
+  
   const app = await NestFactory.create(AppModule);
   
   // CORS configuration - supports both development and production
@@ -34,4 +38,8 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`🚀 Server is running on: http://localhost:${port}`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('Failed to start application:', error);
+  process.exit(1);
+});
