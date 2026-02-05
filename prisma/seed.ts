@@ -1,0 +1,22 @@
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not set');
+}
+
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
+async function main() {
+  // 清空现有数据
+  await prisma.sentence.deleteMany();
+  await prisma.category.deleteMany();
+
+  console.log('Seed 数据已清空！');
+}
+
+main().catch(console.error).finally(() => prisma.$disconnect());
