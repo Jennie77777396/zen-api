@@ -20,11 +20,29 @@ let CategoryController = class CategoryController {
     constructor(categoryService) {
         this.categoryService = categoryService;
     }
-    getTree() {
-        return this.categoryService.getTree();
+    async getTree() {
+        try {
+            return await this.categoryService.getTree();
+        }
+        catch (error) {
+            console.error('Error getting category tree:', error);
+            throw new common_1.HttpException(`Failed to get category tree: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-    create(body) {
-        return this.categoryService.create(body.name, body.parentId);
+    async create(body) {
+        try {
+            if (!body.name || !body.name.trim()) {
+                throw new common_1.HttpException('Category name is required', common_1.HttpStatus.BAD_REQUEST);
+            }
+            return await this.categoryService.create(body.name.trim(), body.parentId);
+        }
+        catch (error) {
+            console.error('Error creating category:', error);
+            if (error instanceof common_1.HttpException) {
+                throw error;
+            }
+            throw new common_1.HttpException(`Failed to create category: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 };
 exports.CategoryController = CategoryController;
@@ -32,14 +50,14 @@ __decorate([
     (0, common_1.Get)('tree'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], CategoryController.prototype, "getTree", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], CategoryController.prototype, "create", null);
 exports.CategoryController = CategoryController = __decorate([
     (0, common_1.Controller)('categories'),

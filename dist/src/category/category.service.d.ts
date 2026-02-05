@@ -7,7 +7,7 @@ export declare class CategoryService {
     create(name: string, parentId?: string): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         parentId: string | null;
+        createdAt: Date;
     }>;
 }

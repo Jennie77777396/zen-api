@@ -22,6 +22,16 @@ export class CategoryService {
   }
 
   async create(name: string, parentId?: string) {
+    // 如果提供了 parentId，验证父分类是否存在
+    if (parentId) {
+      const parent = await this.prisma.category.findUnique({
+        where: { id: parentId },
+      });
+      if (!parent) {
+        throw new Error(`Parent category with ID ${parentId} not found`);
+      }
+    }
+
     return this.prisma.category.create({
       data: { name, parentId },
     });

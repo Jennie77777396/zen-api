@@ -5,11 +5,11 @@ import { PrismaService } from '../prisma/prisma.service';
 export class SentenceService {
   constructor(private prisma: PrismaService) {}
 
-  // 获取所有句子，包含关联的分类信息
+  // 获取所有句子，包含关联的分类信息（多分类）
   async findAll() {
     return this.prisma.sentence.findMany({
       include: {
-        category: {
+        categories: {
           select: {
             id: true,
             name: true,
@@ -22,25 +22,35 @@ export class SentenceService {
     });
   }
 
-  // 创建新句子
-  async create(content: string, categoryId: string, bookName?: string) {
-    // 验证分类是否存在
-    const category = await this.prisma.category.findUnique({
-      where: { id: categoryId },
+  // 创建新句子（支持多分类）
+  async create(content: string, categoryIds: string[], bookName?: string) {
+    // 验证所有分类是否存在
+    if (categoryIds.length === 0) {
+      throw new NotFoundException('At least one category is required');
+    }
+
+    const categories = await this.prisma.category.findMany({
+      where: {
+        id: { in: categoryIds },
+      },
     });
 
-    if (!category) {
-      throw new NotFoundException(`Category with ID ${categoryId} not found`);
+    if (categories.length !== categoryIds.length) {
+      const foundIds = categories.map(c => c.id);
+      const missingIds = categoryIds.filter(id => !foundIds.includes(id));
+      throw new NotFoundException(`Categories with IDs ${missingIds.join(', ')} not found`);
     }
 
     return this.prisma.sentence.create({
       data: {
         content,
-        categoryId,
         bookName,
+        categories: {
+          connect: categoryIds.map(id => ({ id })),
+        },
       },
       include: {
-        category: {
+        categories: {
           select: {
             id: true,
             name: true,

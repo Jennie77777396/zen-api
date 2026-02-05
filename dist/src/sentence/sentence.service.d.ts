@@ -9,10 +9,10 @@ export declare class SentenceService {
         };
     } & {
         id: string;
+        createdAt: Date;
         content: string;
         bookName: string | null;
         categoryId: string;
-        createdAt: Date;
         updatedAt: Date;
     })[]>;
     create(content: string, categoryId: string, bookName?: string): Promise<{
@@ -22,10 +22,10 @@ export declare class SentenceService {
         };
     } & {
         id: string;
+        createdAt: Date;
         content: string;
         bookName: string | null;
         categoryId: string;
-        createdAt: Date;
         updatedAt: Date;
     }>;
     remove(id: string): Promise<{

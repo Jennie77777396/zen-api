@@ -34,8 +34,9 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install ONLY production dependencies
+# Install production dependencies + Prisma CLI (needed for migrations)
 RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --production; fi
+RUN npm install prisma --save-dev --no-save || npm install -g prisma
 
 # Copy Prisma generated client from builder
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
@@ -44,8 +45,11 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Copy Prisma schema (needed for migrations if any)
+# Copy Prisma schema and migrations (needed for migrations)
 COPY --from=builder /app/prisma ./prisma
+
+# Copy Prisma CLI binary if it exists
+COPY --from=builder /app/node_modules/.bin/prisma* ./node_modules/.bin/ 2>/dev/null || true
 
 # Verify files exist (NestJS keeps src/ structure)
 RUN ls -la dist/ && test -f dist/src/main.js
@@ -53,5 +57,8 @@ RUN ls -la dist/ && test -f dist/src/main.js
 # Expose port
 EXPOSE 3000
 
-# Start the application (NestJS outputs to dist/src/main.js)
-CMD ["npm", "run", "start:prod"]
+# Create startup script that runs migrations before starting the app
+RUN echo '#!/bin/sh\nnpx prisma migrate deploy\nnode dist/src/main.js' > /app/start.sh && chmod +x /app/start.sh
+
+# Start the application (runs migrations first, then starts the app)
+CMD ["/app/start.sh"]

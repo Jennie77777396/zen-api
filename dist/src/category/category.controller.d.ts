@@ -9,7 +9,7 @@ export declare class CategoryController {
     }): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         parentId: string | null;
+        createdAt: Date;
     }>;
 }

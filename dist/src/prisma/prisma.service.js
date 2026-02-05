@@ -20,7 +20,19 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
         if (!connectionString) {
             throw new Error('DATABASE_URL environment variable is not set');
         }
-        const pool = new pg_1.Pool({ connectionString });
+        let finalConnectionString = connectionString;
+        if (connectionString.includes('supabase.co')) {
+            if (!connectionString.includes('sslmode=')) {
+                finalConnectionString = connectionString.includes('?')
+                    ? `${connectionString}&sslmode=require`
+                    : `${connectionString}?sslmode=require`;
+            }
+        }
+        console.log('Connecting to database...');
+        const pool = new pg_1.Pool({
+            connectionString: finalConnectionString,
+            ssl: connectionString.includes('supabase.co') ? { rejectUnauthorized: false } : undefined,
+        });
         const adapter = new adapter_pg_1.PrismaPg(pool);
         super({ adapter });
     }

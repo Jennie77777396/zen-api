@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { CategoryService } from './category.service';
 
 @Controller('categories')
@@ -6,12 +6,34 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get('tree')
-  getTree() {
-    return this.categoryService.getTree();
+  async getTree() {
+    try {
+      return await this.categoryService.getTree();
+    } catch (error) {
+      console.error('Error getting category tree:', error);
+      throw new HttpException(
+        `Failed to get category tree: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Post()
-  create(@Body() body: { name: string; parentId?: string }) {
-    return this.categoryService.create(body.name, body.parentId);
+  async create(@Body() body: { name: string; parentId?: string }) {
+    try {
+      if (!body.name || !body.name.trim()) {
+        throw new HttpException('Category name is required', HttpStatus.BAD_REQUEST);
+      }
+      return await this.categoryService.create(body.name.trim(), body.parentId);
+    } catch (error) {
+      console.error('Error creating category:', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(
+        `Failed to create category: ${error.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

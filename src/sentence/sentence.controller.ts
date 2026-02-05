@@ -11,8 +11,10 @@ export class SentenceController {
   }
 
   @Post()
-  create(@Body() body: { content: string; categoryId: string; bookName?: string }) {
-    return this.sentenceService.create(body.content, body.categoryId, body.bookName);
+  create(@Body() body: { content: string; categoryIds: string[]; bookName?: string }) {
+    // 兼容旧格式：如果传入 categoryId，转换为数组
+    const categoryIds = body.categoryIds || (body.categoryId ? [body.categoryId] : []);
+    return this.sentenceService.create(body.content, categoryIds, body.bookName);
   }
 
   @Delete(':id')

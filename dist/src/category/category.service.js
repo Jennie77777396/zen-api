@@ -30,6 +30,14 @@ let CategoryService = class CategoryService {
         }));
     }
     async create(name, parentId) {
+        if (parentId) {
+            const parent = await this.prisma.category.findUnique({
+                where: { id: parentId },
+            });
+            if (!parent) {
+                throw new Error(`Parent category with ID ${parentId} not found`);
+            }
+        }
         return this.prisma.category.create({
             data: { name, parentId },
         });

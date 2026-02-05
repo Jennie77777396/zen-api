@@ -10,7 +10,25 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     if (!connectionString) {
       throw new Error('DATABASE_URL environment variable is not set');
     }
-    const pool = new Pool({ connectionString });
+    
+    // Parse connection string to ensure proper format
+    let finalConnectionString = connectionString;
+    
+    // If using Supabase, ensure SSL is enabled and use direct connection if needed
+    if (connectionString.includes('supabase.co')) {
+      // Add SSL mode if not present
+      if (!connectionString.includes('sslmode=')) {
+        finalConnectionString = connectionString.includes('?')
+          ? `${connectionString}&sslmode=require`
+          : `${connectionString}?sslmode=require`;
+      }
+    }
+    
+    console.log('Connecting to database...');
+    const pool = new Pool({ 
+      connectionString: finalConnectionString,
+      ssl: connectionString.includes('supabase.co') ? { rejectUnauthorized: false } : undefined,
+    });
     const adapter = new PrismaPg(pool);
     super({ adapter });
   }
